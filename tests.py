@@ -68,12 +68,12 @@ def test1_4():
                                "vaccination_date": (date.today() + timedelta(13)).strftime("%Y-%m-%d")}
     assert response.status_code == status.HTTP_201_CREATED
 
-    response = client.post("/register", json=Person(name="Michał", surname="Bąk").dict())
+    response = client.post("/register", json=Person(name="Janusz", surname="Korwin-Mikke").dict())
     assert response.json() == {"id": 3,
-                               "name": "Michał",
-                               "surname": "Bąk",
+                               "name": "Janusz",
+                               "surname": "Korwin-Mikke",
                                "register_date": date.today().strftime("%Y-%m-%d"),
-                               "vaccination_date": (date.today() + timedelta(9)).strftime("%Y-%m-%d")}
+                               "vaccination_date": (date.today() + timedelta(17)).strftime("%Y-%m-%d")}
 
 
 def test1_5():
@@ -95,10 +95,10 @@ def test1_5():
 
     response = client.get("/patient/3")
     assert response.json() == {"id": 3,
-                               "name": "Michał",
-                               "surname": "Bąk",
+                               "name": "Janusz",
+                               "surname": "Korwin-Mikke",
                                "register_date": date.today().strftime("%Y-%m-%d"),
-                               "vaccination_date": (date.today() + timedelta(9)).strftime("%Y-%m-%d")}
+                               "vaccination_date": (date.today() + timedelta(17)).strftime("%Y-%m-%d")}
     assert response.status_code == status.HTTP_200_OK
 
     response = client.get("/patient/0")

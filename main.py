@@ -83,11 +83,13 @@ def id_inc():
 
 @app.post("/register", response_model=Patient, status_code=status.HTTP_201_CREATED)
 def register(person: Person):
+    plainname = ''.join(filter(str.isalpha, person.name))
+    plainsurname = ''.join(filter(str.isalpha, person.surname))
     new_patient = Patient(id=id_inc(),
                    name=person.name,
                    surname=person.surname,
                    register_date=date.today().strftime("%Y-%m-%d"),
-                   vaccination_date=(date.today() + timedelta(days=len(person.name) + len(person.surname))).strftime("%Y-%m-%d"))
+                   vaccination_date=(date.today() + timedelta(days=len(plainname) + len(plainsurname))).strftime("%Y-%m-%d"))
 
     app.patients.append(new_patient)
     return new_patient
