@@ -4,7 +4,11 @@ from fastapi import FastAPI, Response, status
 from pydantic import BaseModel
 from datetime import date, timedelta
 
-app = FastAPI()
+app = FastAPI(
+    title="Python Level Up 2021",
+    description="Projekt aplikacji na potrzeby kursu Python Level Up 2021.",
+)
+
 app.counter = 0
 
 
