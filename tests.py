@@ -60,6 +60,21 @@ def test1_4():
                                "vaccination_date": (date.today() + timedelta(8)).strftime("%Y-%m-%d")}
     assert response.status_code == status.HTTP_201_CREATED
 
+    response = client.post("/register", json=Person(name="Zofia", surname="Kowalska").dict())
+    assert response.json() == {"id": 2,
+                               "name": "Zofia",
+                               "surname": "Kowalska",
+                               "register_date": date.today().strftime("%Y-%m-%d"),
+                               "vaccination_date": (date.today() + timedelta(13)).strftime("%Y-%m-%d")}
+    assert response.status_code == status.HTTP_201_CREATED
+
+    response = client.post("/register", json=Person(name="Michał", surname="Bąk").dict())
+    assert response.json() == {"id": 3,
+                               "name": "Michał",
+                               "surname": "Bąk",
+                               "register_date": date.today().strftime("%Y-%m-%d"),
+                               "vaccination_date": (date.today() + timedelta(9)).strftime("%Y-%m-%d")}
+
 
 def test1_5():
     response = client.get("/patient/1")
@@ -70,8 +85,24 @@ def test1_5():
                                "vaccination_date": (date.today() + timedelta(8)).strftime("%Y-%m-%d")}
     assert response.status_code == status.HTTP_200_OK
 
+    response = client.get("/patient/2")
+    assert response.json() == {"id": 2,
+                               "name": "Zofia",
+                               "surname": "Kowalska",
+                               "register_date": date.today().strftime("%Y-%m-%d"),
+                               "vaccination_date": (date.today() + timedelta(13)).strftime("%Y-%m-%d")}
+    assert response.status_code == status.HTTP_200_OK
+
+    response = client.get("/patient/3")
+    assert response.json() == {"id": 3,
+                               "name": "Michał",
+                               "surname": "Bąk",
+                               "register_date": date.today().strftime("%Y-%m-%d"),
+                               "vaccination_date": (date.today() + timedelta(9)).strftime("%Y-%m-%d")}
+    assert response.status_code == status.HTTP_200_OK
+
     response = client.get("/patient/0")
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    response = client.get("/patient/2")
+    response = client.get("/patient/4")
     assert response.status_code == status.HTTP_404_NOT_FOUND
