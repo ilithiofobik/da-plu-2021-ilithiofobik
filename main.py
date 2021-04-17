@@ -9,7 +9,8 @@ app = FastAPI(
     description="Projekt aplikacji na potrzeby kursu Python Level Up 2021.",
 )
 
-app.counter = 0
+app.id = 0
+app.patients = []
 
 
 class Person(BaseModel):
@@ -33,20 +34,13 @@ class MethodResp(BaseModel):
     method: str
 
 
-patients = []
-
-
 # 1.1
-
-
 @app.get("/", response_model=MessageResp)
 def root():
     return MessageResp(message="Hello world!")
 
 
 # 1.2
-
-
 @app.get("/method", response_model=MethodResp)
 def get_method():
     return MethodResp(method="GET")
@@ -73,7 +67,6 @@ def options_method():
 
 
 # 1.3
-
 @app.get("/auth")
 def get_auth(response: Response, password_hash: Optional[str] = None, password: Optional[str] = None):
     response.status_code = status.HTTP_401_UNAUTHORIZED
@@ -83,36 +76,32 @@ def get_auth(response: Response, password_hash: Optional[str] = None, password: 
 
 
 # 1.4
-
-
-def counter_inc():
-    app.counter += 1
-    return app.counter
+def id_inc():
+    app.id += 1
+    return app.id
 
 
 @app.post("/register", response_model=Patient, status_code=status.HTTP_201_CREATED)
 def register(person: Person):
-    new_patient = Patient(id=counter_inc(),
+    new_patient = Patient(id=id_inc(),
                    name=person.name,
                    surname=person.surname,
                    register_date=date.today().strftime("%Y-%m-%d"),
                    vaccination_date=(date.today() + timedelta(days=len(person.name) + len(person.surname))).strftime("%Y-%m-%d"))
 
-    patients.append(new_patient)
+    app.patients.append(new_patient)
     return new_patient
 
 
 # 1.5
-
-
 @app.get("/patient/{id}", response_model=Patient)
 def patient(id: int, response: Response):
     if id < 1:
         response.status_code = status.HTTP_400_BAD_REQUEST
         return
-    if id > len(patients):
+    if id > len(app.patients):
         response.status_code = status.HTTP_404_NOT_FOUND
         return
 
     response.status_code = status.HTTP_200_OK
-    return patients[id - 1].dict()
+    return app.patients[id - 1].dict()
