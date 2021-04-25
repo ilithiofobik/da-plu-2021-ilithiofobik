@@ -51,8 +51,8 @@ def add_class_method(cls):
     def decorator(func):
         @classmethod
         @wraps(func)
-        def wrapper(self, *args, **kwargs):
-            return func(*args, **kwargs)
+        def wrapper(self):
+            return func()
         setattr(cls, func.__name__, wrapper)
         return func
     return decorator
@@ -61,8 +61,8 @@ def add_class_method(cls):
 def add_instance_method(cls):
     def decorator(func):
         @wraps(func)
-        def wrapper(self, *args, **kwargs):
-            return func(*args, **kwargs)
+        def wrapper(self):
+            return func()
         setattr(cls, func.__name__, wrapper)
         return func
     return decorator
