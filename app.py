@@ -139,7 +139,7 @@ def random_token():
     return ''.join(random.choice(chars) for _ in range(32))
 
 
-@app.post("/login_session")
+@app.post("/login_session", status_code=status.HTTP_201_CREATED)
 def login_session(response: Response, credentials: HTTPBasicCredentials = Depends(security)):
     correct_username = compare_digest(credentials.username, "4dm1n")
     correct_password = compare_digest(credentials.password, "NotSoSecurePa$$")
@@ -150,7 +150,7 @@ def login_session(response: Response, credentials: HTTPBasicCredentials = Depend
     response.set_cookie(key="session_token", value=app.session_token)
 
 
-@app.post("/login_token")
+@app.post("/login_token", status_code=status.HTTP_201_CREATED)
 def login_token(credentials: HTTPBasicCredentials = Depends(security)):
     correct_username = compare_digest(credentials.username, "4dm1n")
     correct_password = compare_digest(credentials.password, "NotSoSecurePa$$")
