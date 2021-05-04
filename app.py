@@ -199,18 +199,18 @@ def welcome_token(response: Response, token: str, format: str = ""):
 
 
 # 3.4
-@app.get("/logout_token")
+@app.delete("/logout_token")
 def logout_token(token: str, format: str = ""):
     if (token not in app.tokens) or (token == ""):
-        raise HTTPException(status_code=401)
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     app.tokens.remove(token)
     return RedirectResponse(url=f"/logged_out?format={format}", status_code=302)
 
 
-@app.get("/logout_session")
+@app.delete("/logout_session")
 def logout_session(session_token: str = Cookie(None), format: str = ""):
     if (session_token not in app.session_tokens) or (session_token == ""):
-        raise HTTPException(status_code=401)
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     app.session_tokens.remove(session_token)
     return RedirectResponse(url=f"/logged_out?format={format}", status_code=302)
 
