@@ -165,7 +165,7 @@ def login_token(response: Response, credentials: HTTPBasicCredentials = Depends(
         raise HTTPException(status_code=401)
 
     session_token = random_token()
-    app.tokens.append(session_token)  # dodawanie login token
+    app.tokens.append(session_token)
 
     if len(app.tokens) > app.max_capacity:
         app.tokens.pop(0)
@@ -176,8 +176,8 @@ def login_token(response: Response, credentials: HTTPBasicCredentials = Depends(
 # 3.3
 @app.get("/welcome_session", status_code=200)
 def welcome_session(response: Response, session_token: str = Cookie(None), format: str = ""):
-    if (session_token not in app.session_tokens) or (session_token == ""):
-        raise HTTPException(status_code=401, detail="Unathorised")
+    if session_token not in app.session_tokens:
+        raise HTTPException(status_code=401, detail="Unauthorised")
 
     if format == 'json':
         return {"message": "Welcome!"}
@@ -189,8 +189,8 @@ def welcome_session(response: Response, session_token: str = Cookie(None), forma
 
 @app.get("/welcome_token", status_code=200)
 def welcome_token(response: Response, token: str, format: str = ""):
-    if (token not in app.tokens) or (token == ""):
-        raise HTTPException(status_code=401, detail="Unathorised")
+    if token not in app.tokens:
+        raise HTTPException(status_code=401, detail="Unauthorised")
 
     if format == 'json':
         return {"message": "Welcome!"}
