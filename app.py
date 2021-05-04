@@ -176,7 +176,7 @@ def login_token(response: Response, credentials: HTTPBasicCredentials = Depends(
 # 3.3
 @app.get("/welcome_session")
 def welcome_session(format:str = "", session_token: str = Cookie(None)):
-    if session_token not in app.session_tokens:
+    if session_token is None or session_token not in app.session_tokens:
         raise HTTPException(status_code=401)
     if format == "json":
         return {"message": "Welcome!"}
@@ -187,8 +187,8 @@ def welcome_session(format:str = "", session_token: str = Cookie(None)):
 
 
 @app.get("/welcome_token")
-def welcome_token(token: str = "", format: str = ""):
-    if (token == "") or (token not in app.tokens):
+def welcome_token(token: str = None, format: str = ""):
+    if token is None or token not in app.tokens:
         raise HTTPException(status_code=401)
     if format == "json":
         return {"message": "Welcome!"}
