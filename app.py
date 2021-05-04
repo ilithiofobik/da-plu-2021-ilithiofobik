@@ -20,7 +20,7 @@ app.id = 0
 app.patients = []
 app.session_tokens = []
 app.tokens = []
-app.max_capacity = 1
+app.max_capacity = 3
 
 templates = Jinja2Templates(directory="templates")
 security = HTTPBasic()
