@@ -185,34 +185,34 @@ def format_response(formatt, text):
 
 
 @app.get("/welcome_session", status_code=200)
-def welcome_session(response: Response, session_token: str = Cookie(None), format: str = ""):
-    if (session_token not in app.session_tokens) or (session_token == ""):
+def welcome_session(session_token: str = Cookie(None), formatt: str = ""):
+    if session_token not in app.session_tokens:
         raise HTTPException(status_code=401)
-    return format_response(format, "Welcome!")
+    return format_response(formatt, "Welcome!")
 
 
 @app.get("/welcome_token", status_code=200)
-def welcome_token(response: Response, token: str, format: str = ""):
+def welcome_token(token: str, formatt: str = ""):
     if (token not in app.tokens) or (token == ""):
         raise HTTPException(status_code=401)
-    return format_response(format, "Welcome!")
+    return format_response(formatt, "Welcome!")
 
 
 # 3.4
 @app.delete("/logout_token")
-def logout_token(token: str, format: str = ""):
-    if (token not in app.tokens) or (token == ""):
+def logout_token(token: str, formatt: str = ""):
+    if token not in app.tokens:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     app.tokens.remove(token)
-    return RedirectResponse(url=f"/logged_out?format={format}", status_code=302)
+    return RedirectResponse(url=f"/logged_out?format={formatt}", status_code=302)
 
 
 @app.delete("/logout_session")
-def logout_session(session_token: str = Cookie(None), format: str = ""):
-    if (session_token not in app.session_tokens) or (session_token == ""):
+def logout_session(session_token: str = Cookie(None), formatt: str = ""):
+    if session_token not in app.session_tokens:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     app.session_tokens.remove(session_token)
-    return RedirectResponse(url=f"/logged_out?format={format}", status_code=302)
+    return RedirectResponse(url=f"/logged_out?format={formatt}", status_code=302)
 
 
 @app.get("/logged_out")
