@@ -163,60 +163,64 @@ def login_token(credentials: HTTPBasicCredentials = Depends(security)):
 
 # 3.3
 @app.get("/welcome_session")
-def welcome_session(response: Response, request: Request, format: Optional[str] = None, session_token: str = Cookie(None)):
-    if session_token != app.session_token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-    else:
-        if format == "json":
-            response.headers["content-type"] = "json"
-            return {"message": "Welcome!"}
-        elif format == "html":
-            response.headers["content-type"] = "html"
-            return templates.TemplateResponse(
-                "welcome.html.j2",
-                {"request": request},
-            )
-        else:
-            response.headers["content-type"] = "plain"
-            return "Welcome!"
+def welcome_session(response: Response, request: Request, formatt: Optional[str] = None, session_token: str = Cookie(None)):
+    if session_token is not None and app.session_token is not None:
+        if session_token == app.session_token:
+            if formatt == "json":
+                response.headers["content-type"] = "json"
+                return {"message": "Welcome!"}
+            elif formatt == "html":
+                response.headers["content-type"] = "html"
+                return templates.TemplateResponse(
+                    "welcome.html.j2",
+                    {"request": request},
+                )
+            else:
+                response.headers["content-type"] = "plain"
+                return "Welcome!"
+
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
 
 @app.get("/welcome_token")
-def welcome_token(response: Response, request: Request, token: Optional[str] = None, format: Optional[str] = None):
-    if token != app.token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-    else:
-        if format == "json":
-            response.headers["content-type"] = "json"
-            return {"message": "Welcome!"}
-        elif format == "html":
-            response.headers["content-type"] = "html"
-            return templates.TemplateResponse(
-                "welcome.html.j2",
-                {"request": request},
-            )
-        else:
-            response.headers["content-type"] = "plain"
-            return "Welcome!"
+def welcome_token(response: Response, request: Request, token: Optional[str] = None, formatt: Optional[str] = None):
+    if token is not None and app.token is not None:
+        if token == app.token:
+            if formatt == "json":
+                response.headers["content-type"] = "json"
+                return {"message": "Welcome!"}
+            elif formatt == "html":
+                response.headers["content-type"] = "html"
+                return templates.TemplateResponse(
+                    "welcome.html.j2",
+                    {"request": request},
+                )
+            else:
+                response.headers["content-type"] = "plain"
+                return "Welcome!"
+
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
 
 # 3.4
 @app.get("/logout_token")
-def logout_token(request: Request, token: Optional[str] = None, format: Optional[str] = None):
-    if token != app.token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+def logout_token(token: Optional[str] = None, formatt: Optional[str] = None):
+    if token is not None and app.token is not None:
+        if token == app.token:
+            app.token = None
+            return RedirectResponse(url=f'/logged_out?format={formatt}', status_code=status.HTTP_302_FOUND)
     else:
-        app.token = None
-        return RedirectResponse(url=f'/logged_out?format={format}', status_code=status.HTTP_302_FOUND)
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
 
 @app.get("/logout_session")
-def logout_session(request: Request, format: Optional[str] = None, session_token: str = Cookie(None)):
-    if session_token != app.session_token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+def logout_session(formatt: Optional[str] = None, session_token: str = Cookie(None)):
+    if session_token is not None and app.session_token is not None:
+        if session_token == app.session_token:
+            app.session_token = None
+            return RedirectResponse(url=f'/logged_out?format={formatt}', status_code=status.HTTP_302_FOUND)
     else:
-        app.session_token = None
-        return RedirectResponse(url=f'/logged_out?format={format}', status_code=status.HTTP_302_FOUND)
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
 
 @app.get("/logged_out")
