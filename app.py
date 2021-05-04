@@ -163,7 +163,7 @@ def login_token(credentials: HTTPBasicCredentials = Depends(security)):
 
 # 3.3
 @app.get("/welcome_session", status_code=status.HTTP_200_OK)
-def welcome_session(response: Response, request: Request, formatt: Optional[str] = None, session_token: str = Cookie(None)):
+def welcome_session(*, response: Response, request: Request, formatt: Optional[str] = None, session_token: str = Cookie(None)):
     if session_token is not None and session_token == app.session_token:
         if formatt == "json":
             response.headers["content-type"] = "json"
@@ -182,7 +182,7 @@ def welcome_session(response: Response, request: Request, formatt: Optional[str]
 
 
 @app.get("/welcome_token", status_code=status.HTTP_200_OK)
-def welcome_token(response: Response, request: Request, token: Optional[str] = None, formatt: Optional[str] = None):
+def welcome_token(*, response: Response, request: Request, token: Optional[str] = None, formatt: Optional[str] = None):
     if token is not None and token == app.token:
         if formatt == "json":
             response.headers["content-type"] = "json"
