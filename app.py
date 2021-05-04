@@ -163,7 +163,7 @@ def login_token(credentials: HTTPBasicCredentials = Depends(security)):
 
 # 3.3
 @app.get("/welcome_session", status_code=status.HTTP_200_OK)
-def welcome_session(formatt: str = "", session_token: str = Cookie(None)):
+def welcome_session(formatt: str = "", session_token: str = Cookie("")):
     if session_token == "" or session_token != app.session_token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     if formatt == "json":
