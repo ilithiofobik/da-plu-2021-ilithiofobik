@@ -177,19 +177,18 @@ def format_response(formatt, text):
                              headers={"content-type": "plain"})
 
 
-@app.get("/welcome_session")
-def welcome_session(formatt: str = None, session_token: str = Cookie(None)):
-    if session_token is not None and session_token == app.session_token:
-        return format_response(formatt, 'Welcome!')
-    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+@app.get("/welcome_session", status_code=200)
+def welcome_session(response: Response, session_token: str = Cookie(None), format: str = ""):
+    if (session_token != app.session_token) or (session_token == ""):
+        raise HTTPException(status_code=401)
+    return format_response(format, "Welcome!")
 
 
-@app.get("/welcome_token")
-def welcome_token(token: str = None, formatt: str = None):
-    if token is not None and token == app.token:
-        return format_response(formatt, 'Welcome!')
-    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-
+@app.get("/welcome_token", status_code=200)
+def welcome_token(response: Response, token: str, format: str = ""):
+    if (token != app.token) or (token == ""):
+        raise HTTPException(status_code=401)
+    return format_response(format, "Welcome!")
 
 # 3.4
 @app.get("/logout_token")
