@@ -165,10 +165,16 @@ def login_token(credentials: HTTPBasicCredentials = Depends(security)):
 def format_response(formatt, text):
     if formatt is not None:
         if formatt == "json":
-            return JSONResponse(content={"message": text}, status_code=status.HTTP_200_OK)
+            return JSONResponse(content={"message": text},
+                                status_code=status.HTTP_200_OK,
+                                headers={"content-type": "json"})
         if formatt == "html":
-            return HTMLResponse(content="<h1>" + text + "</h1>", status_code=status.HTTP_200_OK)
-    return PlainTextResponse(content=text, status_code=status.HTTP_200_OK)
+            return HTMLResponse(content="<h1>" + text + "</h1>",
+                                status_code=status.HTTP_200_OK,
+                                headers={"content-type": "html"})
+    return PlainTextResponse(content=text,
+                             status_code=status.HTTP_200_OK,
+                             headers={"content-type": "plain"})
 
 
 @app.get("/welcome_session")
@@ -180,7 +186,7 @@ def welcome_session(formatt: str = None, session_token: str = Cookie(None)):
 
 @app.get("/welcome_token")
 def welcome_token(token: str = None, formatt: str = None):
-    if token is not None and token == app.session_token:
+    if token is not None and token == app.token:
         return format_response(formatt, 'Welcome!')
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
@@ -207,16 +213,5 @@ def logout_session(formatt: Optional[str] = None, session_token: str = Cookie(No
 
 
 @app.get("/logged_out")
-def logout_session(response: Response, request: Request, format: Optional[str] = None):
-    if format == "json":
-        response.headers["content-type"] = "json"
-        return Response({"message": "Logged out!"})
-    elif format == "html":
-        response.headers["content-type"] = "html"
-        return templates.TemplateResponse(
-            "logged_out.html.j2",
-            {"request": request},
-        )
-    else:
-        response.headers["content-type"] = "plain"
-        return "Welcome!"
+def logout_session(formatt: Optional[str] = None):
+    return format_response(formatt, "Logged out!")
