@@ -174,28 +174,30 @@ def login_token(response: Response, credentials: HTTPBasicCredentials = Depends(
 
 
 # 3.3
-@app.get("/welcome_session")
-def welcome_session(format:str = "", session_token: str = Cookie(None)):
-    if session_token is None or session_token not in app.session_tokens:
-        raise HTTPException(status_code=401)
-    if format == "json":
+@app.get("/welcome_session", status_code=200)
+def welcome_session(response: Response, session_token: str = Cookie(None), format: str = ""):
+    if (session_token not in app.session_tokens) or (session_token == ""):
+        raise HTTPException(status_code=401, detail="Unauthorised")
+
+    if format == 'json':
         return {"message": "Welcome!"}
-    elif format == "html":
-        return HTMLResponse(content="<h1>Welcome!</h1>", status_code=200)
+    elif format == 'html':
+        return HTMLResponse(content="<h1>Welcome!</h1>")
     else:
-        return PlainTextResponse(content="Welcome!", status_code=200)
+        return PlainTextResponse(content="Welcome!")
 
 
-@app.get("/welcome_token")
-def welcome_token(token: str = None, format: str = ""):
-    if token is None or token not in app.tokens:
-        raise HTTPException(status_code=401)
-    if format == "json":
+@app.get("/welcome_token", status_code=200)
+def welcome_token(response: Response, token: str, format: str = ""):
+    if (token not in app.tokens) or (token == ""):
+        raise HTTPException(status_code=401, detail="Unauthorised")
+
+    if format == 'json':
         return {"message": "Welcome!"}
-    elif format == "html":
-        return HTMLResponse(content="<h1>Welcome!</h1>", status_code=200)
+    elif format == 'html':
+        return HTMLResponse(content="<h1>Welcome!</h1>")
     else:
-        return PlainTextResponse(content="Welcome!", status_code=200)
+        return PlainTextResponse(content="Welcome!")
 
 
 # 3.4
