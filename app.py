@@ -3,7 +3,7 @@ import string
 from hashlib import sha512
 from typing import Optional
 from fastapi import FastAPI, Request, Response, Cookie, HTTPException, Depends, status
-from fastapi.responses import RedirectResponse, PlainTextResponse
+from fastapi.responses import RedirectResponse, PlainTextResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel
@@ -163,41 +163,27 @@ def login_token(credentials: HTTPBasicCredentials = Depends(security)):
 
 # 3.3
 @app.get("/welcome_session", status_code=status.HTTP_200_OK)
-def welcome_session(*, response: Response, request: Request, formatt: Optional[str] = None, session_token: str = Cookie(None)):
-    if session_token is not None and session_token == app.session_token:
-        if formatt == "json":
-            response.headers["content-type"] = "json"
-            return {"message": "Welcome!"}
-        elif formatt == "html":
-            response.headers["content-type"] = "html"
-            return templates.TemplateResponse(
-                "welcome.html.j2",
-                {"request": request},
-            )
-        else:
-            response.headers["content-type"] = "plain"
-            return PlainTextResponse(content="Welcome!")
-
-    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+def welcome_session(formatt: str = "", session_token: str = Cookie(None)):
+    if session_token == "" or session_token != app.session_token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    if formatt == "json":
+        return {"message": "Welcome!"}
+    elif formatt == "html":
+        return HTMLResponse(content="<h1>Welcome!</h1>")
+    else:
+        return PlainTextResponse(content="Welcome!")
 
 
 @app.get("/welcome_token", status_code=status.HTTP_200_OK)
-def welcome_token(*, response: Response, request: Request, token: Optional[str] = None, formatt: Optional[str] = None):
-    if token is not None and token == app.token:
-        if formatt == "json":
-            response.headers["content-type"] = "json"
-            return {"message": "Welcome!"}
-        elif formatt == "html":
-            response.headers["content-type"] = "html"
-            return templates.TemplateResponse(
-                "welcome.html.j2",
-                {"request": request},
-            )
-        else:
-            response.headers["content-type"] = "plain"
-            return PlainTextResponse(content="Welcome!")
-
-    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+def welcome_token(token: str = "", formatt: str = ""):
+    if token == "" or token != app.token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    if formatt == "json":
+        return {"message": "Welcome!"}
+    elif formatt == "html":
+        return HTMLResponse(content="<h1>Welcome!</h1>")
+    else:
+        return PlainTextResponse(content="Welcome!")
 
 
 # 3.4
