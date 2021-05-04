@@ -124,8 +124,9 @@ def patient(id: int, response: Response):
 
 # 3.1
 @app.get("/hello")
-def hello_date(request: Request):
+def hello_date(response: Response,request: Request):
     today = date.today().strftime("%Y-%m-%d")
+    response.headers["content-type"] = "html"
     return templates.TemplateResponse(
         "hello_date.html.j2",
         {"request": request, "date": today},
@@ -162,34 +163,40 @@ def login_token(credentials: HTTPBasicCredentials = Depends(security)):
 
 # 3.3
 @app.get("/welcome_session")
-def welcome_session(request: Request, format: Optional[str] = None, session_token: str = Cookie(None)):
+def welcome_session(response: Response, request: Request, format: Optional[str] = None, session_token: str = Cookie(None)):
     if session_token != app.session_token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     else:
         if format == "json":
+            response.headers["content-type"] = "json"
             return {"message": "Welcome!"}
         elif format == "html":
+            response.headers["content-type"] = "html"
             return templates.TemplateResponse(
                 "welcome.html.j2",
                 {"request": request},
             )
         else:
+            response.headers["content-type"] = "plain"
             return "Welcome!"
 
 
 @app.get("/welcome_token")
-def welcome_token(request: Request, token: Optional[str] = None, format: Optional[str] = None):
+def welcome_token(response: Response, request: Request, token: Optional[str] = None, format: Optional[str] = None):
     if token != app.token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     else:
         if format == "json":
+            response.headers["content-type"] = "json"
             return {"message": "Welcome!"}
         elif format == "html":
+            response.headers["content-type"] = "html"
             return templates.TemplateResponse(
                 "welcome.html.j2",
                 {"request": request},
             )
         else:
+            response.headers["content-type"] = "plain"
             return "Welcome!"
 
 
