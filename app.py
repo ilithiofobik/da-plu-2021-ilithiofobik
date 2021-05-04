@@ -3,7 +3,7 @@ import string
 from hashlib import sha512
 from typing import Optional
 from fastapi import FastAPI, Request, Response, Cookie, HTTPException, Depends, status
-from fastapi.responses import RedirectResponse, PlainTextResponse, HTMLResponse
+from fastapi.responses import RedirectResponse, PlainTextResponse, HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel
@@ -162,28 +162,27 @@ def login_token(credentials: HTTPBasicCredentials = Depends(security)):
 
 
 # 3.3
-@app.get("/welcome_session", status_code=status.HTTP_200_OK)
-def welcome_session(formatt: str = "", session_token: str = Cookie("")):
-    if session_token == "" or session_token != app.session_token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-    if formatt == "json":
-        return {"message": "Welcome!"}
-    elif formatt == "html":
-        return HTMLResponse(content="<h1>Welcome!</h1>")
-    else:
-        return PlainTextResponse(content="Welcome!")
+def format_response(formatt, text):
+    if formatt is not None:
+        if formatt == "json":
+            return JSONResponse(content={"message": text}, status_code=status.HTTP_200_OK)
+        if formatt == "html":
+            return HTMLResponse(content="<h1>" + text + "</h1>", status_code=status.HTTP_200_OK)
+    return PlainTextResponse(content=text, status_code=status.HTTP_200_OK)
 
 
-@app.get("/welcome_token", status_code=status.HTTP_200_OK)
-def welcome_token(token: str = "", formatt: str = ""):
-    if token == "" or token != app.token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-    if formatt == "json":
-        return {"message": "Welcome!"}
-    elif formatt == "html":
-        return HTMLResponse(content="<h1>Welcome!</h1>")
-    else:
-        return PlainTextResponse(content="Welcome!")
+@app.get("/welcome_session")
+def welcome_session(formatt: str = None, session_token: str = Cookie(None)):
+    if session_token is not None and session_token == app.session_token:
+        return format_response(formatt, 'Welcome!')
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+
+
+@app.get("/welcome_token")
+def welcome_token(token: str = None, formatt: str = None):
+    if token is not None and token == app.session_token:
+        return format_response(formatt, 'Welcome!')
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
 
 # 3.4
