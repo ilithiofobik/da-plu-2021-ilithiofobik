@@ -18,8 +18,9 @@ app = FastAPI(
 
 app.id = 0
 app.patients = []
-app.session_token = ""
-app.token = ""
+app.session_tokens = []
+app.tokens = []
+app.max_capacity = 1
 
 templates = Jinja2Templates(directory="templates")
 security = HTTPBasic()
@@ -146,8 +147,11 @@ def login_session(response: Response, credentials: HTTPBasicCredentials = Depend
     if not correct_username or not correct_password:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
-    app.session_token = random_token()
-    response.set_cookie(key="session_token", value=app.session_token)
+    session_token = random_token()
+    app.session_tokens.append(session_token)
+    if len(app.session_tokens) > app.max_capacity:
+        app.session_tokens.pop(0)
+    response.set_cookie(key="session_token", value=session_token)
 
 
 @app.post("/login_token", status_code=status.HTTP_201_CREATED)
@@ -157,8 +161,11 @@ def login_token(credentials: HTTPBasicCredentials = Depends(security)):
     if not correct_username or not correct_password:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
-    app.token = random_token()
-    return {"token": app.token}
+    token = random_token()
+    app.tokens.append(token)
+    if len(app.tokens) > app.max_capacity:
+        app.tokens.pop(0)
+    return {"token": token}
 
 
 # 3.3
@@ -179,38 +186,35 @@ def format_response(formatt, text):
 
 @app.get("/welcome_session", status_code=200)
 def welcome_session(response: Response, session_token: str = Cookie(None), format: str = ""):
-    if (session_token != app.session_token) or (session_token == ""):
+    if (session_token not in app.session_tokens) or (session_token == ""):
         raise HTTPException(status_code=401)
     return format_response(format, "Welcome!")
 
 
 @app.get("/welcome_token", status_code=200)
 def welcome_token(response: Response, token: str, format: str = ""):
-    if (token != app.token) or (token == ""):
+    if (token not in app.tokens) or (token == ""):
         raise HTTPException(status_code=401)
     return format_response(format, "Welcome!")
 
+
 # 3.4
 @app.get("/logout_token")
-def logout_token(token: Optional[str] = None, formatt: Optional[str] = None):
-    if token is not None and app.token is not None:
-        if token == app.token:
-            app.token = None
-            return RedirectResponse(url=f'/logged_out?format={formatt}', status_code=status.HTTP_302_FOUND)
-    else:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+def logout_token(token: str, format: str = ""):
+    if (token not in app.tokens) or (token == ""):
+        raise HTTPException(status_code=401)
+    app.tokens.remove(token)
+    return RedirectResponse(url=f"/logged_out?format={format}", status_code=302)
 
 
 @app.get("/logout_session")
-def logout_session(formatt: Optional[str] = None, session_token: str = Cookie(None)):
-    if session_token is not None and app.session_token is not None:
-        if session_token == app.session_token:
-            app.session_token = None
-            return RedirectResponse(url=f'/logged_out?format={formatt}', status_code=status.HTTP_302_FOUND)
-    else:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+def logout_session(session_token: str = Cookie(None), format: str = ""):
+    if (session_token not in app.session_tokens) or (session_token == ""):
+        raise HTTPException(status_code=401)
+    app.session_tokens.remove(session_token)
+    return RedirectResponse(url=f"/logged_out?format={format}", status_code=302)
 
 
 @app.get("/logged_out")
-def logout_session(formatt: Optional[str] = None):
+def logout_session(formatt: str = ""):
     return format_response(formatt, "Logged out!")
