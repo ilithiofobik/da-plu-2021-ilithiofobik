@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from fastapi import status
 from fastapi.testclient import TestClient
-from main import app, Person
+from app import app, Person
 
 client = TestClient(app)
 
