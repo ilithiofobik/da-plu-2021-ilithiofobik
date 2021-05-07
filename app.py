@@ -259,8 +259,11 @@ async def categories():
 
 @app.get("/customers", status_code=status.HTTP_200_OK)
 async def customers():
-    customers = app.db_connection.execute("SELECT CustomerID, CompanyName, Address, PostalCode, City, Country "
-                                          "FROM Customers ").fetchall()
+    customers = app.db_connection.execute("""
+                                          SELECT CustomerID, CompanyName, Address, PostalCode, City, Country
+                                          FROM Customers 
+                                          ORDER BY CustomerID
+                                          """).fetchall()
     return {"customers": [{"id": customer[0],
                            "name": customer[1],
                            "full_address": str(customer[2]) + ' ' +
