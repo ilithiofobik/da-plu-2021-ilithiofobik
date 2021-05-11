@@ -249,13 +249,6 @@ async def shutdown():
     app.db_connection.close()
 
 
-@app.get("/categories", status_code=status.HTTP_200_OK)
-async def categories():
-    categories = app.db_connection.execute("SELECT CategoryID, CategoryName "
-                                           "FROM Categories "
-                                           "ORDER BY CategoryID").fetchall()
-    return {"categories": [{"id": category[0], "name": category[1]} for category in categories]}
-
 
 def str_validate(s):
     if s:
