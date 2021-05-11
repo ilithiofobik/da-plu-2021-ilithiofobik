@@ -257,26 +257,18 @@ async def categories():
     return {"categories": [{"id": category[0], "name": category[1]} for category in categories]}
 
 
-def str_validate(s):
-    if s:
-        return s
-    return ""
-
-
-@app.get("/customers", status_code=status.HTTP_200_OK)
+@app.get("/customers")
 async def get_customers():
     cursor = app.db_connection.cursor()
-    cursor.row_factory = lambda cursor, col: {"id": col[0],
-                                              "name": col[1],
-                                              "full_address": str_validate(col[2]) + " "
-                                                              + str_validate(col[3]) + " "
-                                                              + str_validate(col[4]) + " "
-                                                              + str_validate(col[5])}
-    customers = cursor.execute('''SELECT CustomerID, CompanyName, Address, PostalCode, City, Country 
-                                  FROM Customers
-                                  ORDER BY CustomerID''').fetchall()
+    cursor.row_factory = sqlite3.Row
+    customers = cursor.execute("""SELECT CustomerID id, 
+                                  COALESCE(CompanyName, '') name,
+                                  COALESCE(Address, '') || ' ' || 
+                                  COALESCE(PostalCode, '') || ' ' || 
+                                  COALESCE(City, '') || ' ' || 
+                                  COALESCE(Country, '') full_address 
+                                  FROM Customers c ORDER BY UPPER(CustomerID)""").fetchall()
     return {"customers": customers}
-
 
 # 4.2
 @app.get("/products/{id}")
