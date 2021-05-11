@@ -249,6 +249,13 @@ async def shutdown():
     app.db_connection.close()
 
 
+@app.get("/categories", status_code=status.HTTP_200_OK)
+async def categories():
+    categories = app.db_connection.execute("SELECT CategoryID, CategoryName "
+                                           "FROM Categories "
+                                           "ORDER BY CategoryID").fetchall()
+    return {"categories": [{"id": category[0], "name": category[1]} for category in categories]}
+
 
 def str_validate(s):
     if s:
@@ -285,24 +292,21 @@ async def products(id: int):
 
 
 # 4.3
-@app.get("/employees")
-async def employees(limit: int, offset: int, order: str = 'EmployeeID'):
-    if order not in ['first_name', 'last_name', 'city', 'EmployeeID']:
+@app.get("/employees", status_code=status.HTTP_200_OK)
+async def get_employees(limit: Optional[int] = -1, offset: Optional[int] = 0, order: Optional[str] = None):
+    cursor = app.db_connection.cursor()
+    cursor.row_factory = sqlite3.Row
+    if order and order not in ['first_name', 'last_name', 'city']:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
-
-    app.db_connection.row_factory = sqlite3.Row
-
-    data = app.db_connection.execute(f'''
-                    SELECT EmployeeID, LastName, FirstName, City 
-                    FROM Employees
-                    ORDER BY {order}
-                    LIMIT {limit} OFFSET {offset};
-                    ''').fetchall()
-
-    return {"employees": [{"id": x['EmployeeID'],
-                           "last_name": x['LastName'],
-                           "first_name": x['FirstName'],
-                           "city": x['City']} for x in data]}
+    if not order:
+        order = 'id'
+    result = cursor.execute(f"""SELECT EmployeeID id, LastName last_name, FirstName first_name, City city 
+                            FROM Employees e 
+                            ORDER BY {order} 
+                            LIMIT :limit 
+                            OFFSET :offset""",
+                            {'limit': limit, 'offset': offset}).fetchall()
+    return {"employees": result}
 
 
 # 4.4
