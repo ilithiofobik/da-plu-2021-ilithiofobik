@@ -241,6 +241,7 @@ def logged_out(format: str = ""):
 @app.on_event("startup")
 async def startup():
     app.db_connection = sqlite3.connect("northwind.db")
+    app.db_connection.row_factory = sqlite3.Row
     app.db_connection.text_factory = lambda b: b.decode(errors="ignore")
 
 
@@ -260,16 +261,11 @@ async def categories():
 @app.get("/customers", status_code=status.HTTP_200_OK)
 async def customers():
     customers = app.db_connection.execute("""
-                                          SELECT CustomerID, CompanyName, Address, PostalCode, City, Country
+                                          SELECT CustomerID id, CompanyName || " " || Address || " " || PostalCode || " " ||  City || " " ||  Country full_address
                                           FROM Customers 
                                           ORDER BY CustomerID
                                           """).fetchall()
-    return {"customers": [{"id": customer[0],
-                           "name": customer[1],
-                           "full_address": str(customer[2]) + ' ' +
-                                           str(customer[3]) + ' ' +
-                                           str(customer[4]) + ' ' +
-                                           str(customer[5])} for customer in customers]}
+    return dict(customers=customers)
 
 
 # 4.2
@@ -287,7 +283,7 @@ async def products(id: int):
 
 # 4.3
 @app.get("/employees")
-async def employees(limit: int, offset: int, order: str = 'EmployeeID'):
+async def employees(limit: int = 18446744073709551615, offset: int = 0, order: str = 'EmployeeID'):
     if order not in ['first_name', 'last_name', 'city', 'EmployeeID']:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
 
@@ -376,11 +372,12 @@ async def categories_put(category: Category):
         cursor = app.db_connection.execute(f"""UPDATE Categories 
                                                SET CategoryName = {category.name}
                                                WHERE CategoryID = {id}""")
-        app.db_connection.commit()
-        return {
-            "id": id,
-            "name": category.name
-        }
+        if cursor.rowcount > 0:
+            app.db_connection.commit()
+            return {
+                "id": id,
+                "name": category.name
+            }
 
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
@@ -391,5 +388,5 @@ async def categories_delete(id: int):
     if data:
         cursor = app.db_connection.execute(f"DELETE FROM Categories WHERE CategoryID = {id}")
         app.db_connection.commit()
-
+        return dict(deleted=cursor.rowcount)
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
