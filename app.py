@@ -241,7 +241,6 @@ def logged_out(format: str = ""):
 @app.on_event("startup")
 async def startup():
     app.db_connection = sqlite3.connect("northwind.db")
-    app.db_connection.row_factory = sqlite3.Row
     app.db_connection.text_factory = lambda b: b.decode(errors="ignore")
 
 
@@ -258,14 +257,25 @@ async def categories():
     return {"categories": [{"id": category[0], "name": category[1]} for category in categories]}
 
 
+def str_validate(s):
+    if s:
+        return s
+    return ""
+
+
 @app.get("/customers", status_code=status.HTTP_200_OK)
-async def customers():
-    customers = app.db_connection.execute("""
-                                          SELECT CustomerID id, COALESCE(Address, '') || ' ' || COALESCE(PostalCode, '') || ' ' || COALESCE(City, '') || ' ' || COALESCE(Country, '') full_address
-                                          FROM Customers 
-                                          ORDER BY CustomerID
-                                          """).fetchall()
-    return dict(customers=customers)
+async def get_customers():
+    cursor = app.db_connection.cursor()
+    cursor.row_factory = lambda cursor, col: {"id": col[0],
+                                              "name": col[1],
+                                              "full_address": str_validate(col[2]) + " "
+                                                              + str_validate(col[3]) + " "
+                                                              + str_validate(col[4]) + " "
+                                                              + str_validate(col[5])}
+    customers = cursor.execute('''SELECT CustomerID, CompanyName, Address, PostalCode, City, Country 
+                                  FROM Customers
+                                  ORDER BY CustomerID''').fetchall()
+    return {"customers": customers}
 
 
 # 4.2
@@ -283,7 +293,7 @@ async def products(id: int):
 
 # 4.3
 @app.get("/employees")
-async def employees(limit: int = 18446744073709551615, offset: int = 0, order: str = 'EmployeeID'):
+async def employees(limit: int, offset: int, order: str = 'EmployeeID'):
     if order not in ['first_name', 'last_name', 'city', 'EmployeeID']:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
 
@@ -372,12 +382,11 @@ async def categories_put(category: Category):
         cursor = app.db_connection.execute(f"""UPDATE Categories 
                                                SET CategoryName = {category.name}
                                                WHERE CategoryID = {id}""")
-        if cursor.rowcount > 0:
-            app.db_connection.commit()
-            return {
-                "id": id,
-                "name": category.name
-            }
+        app.db_connection.commit()
+        return {
+            "id": id,
+            "name": category.name
+        }
 
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
@@ -388,5 +397,5 @@ async def categories_delete(id: int):
     if data:
         cursor = app.db_connection.execute(f"DELETE FROM Categories WHERE CategoryID = {id}")
         app.db_connection.commit()
-        return dict(deleted=cursor.rowcount)
+
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
