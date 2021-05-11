@@ -261,7 +261,7 @@ async def categories():
 @app.get("/customers", status_code=status.HTTP_200_OK)
 async def customers():
     customers = app.db_connection.execute("""
-                                          SELECT CustomerID id, CompanyName || " " || Address || " " || PostalCode || " " ||  City || " " ||  Country full_address
+                                          SELECT CustomerID id, COALESCE(Address, '') || ' ' || COALESCE(PostalCode, '') || ' ' || COALESCE(City, '') || ' ' || COALESCE(Country, '') full_address
                                           FROM Customers 
                                           ORDER BY CustomerID
                                           """).fetchall()
