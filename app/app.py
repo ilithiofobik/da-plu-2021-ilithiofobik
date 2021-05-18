@@ -10,11 +10,15 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel
 from datetime import date, timedelta
 from secrets import compare_digest
+from views import router as northwind_api_router
+
 
 app = FastAPI(
     title="Python Level Up 2021",
     description="Projekt aplikacji na potrzeby kursu Python Level Up 2021.",
 )
+
+app.include_router(northwind_api_router, tags=["northwind"])
 
 app.id = 0
 app.patients = []
@@ -240,7 +244,7 @@ def logged_out(format: str = ""):
 # 4.1
 @app.on_event("startup")
 async def startup():
-    app.db_connection = sqlite3.connect("northwind.db")
+    app.db_connection = sqlite3.connect("../northwind.db")
     app.db_connection.text_factory = lambda b: b.decode(errors="ignore")
 
 
