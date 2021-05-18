@@ -14,7 +14,7 @@ class SimpleSupplier(BaseModel):
 # 5.2
 class Category(BaseModel):
     CategoryID: PositiveInt
-    CategoryName: constr(max_length=15)
+    CategoryName: constr(max_length=40)
 
     class Config:
         orm_mode = True
