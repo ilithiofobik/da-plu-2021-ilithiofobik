@@ -1,4 +1,4 @@
-from app.decorators import greetings, is_palindrome, format_output, add_class_method, add_instance_method
+from decorators import greetings, is_palindrome, format_output, add_class_method, add_instance_method
 import pytest
 
 #2.1

@@ -12,19 +12,19 @@ class SimpleSupplier(BaseModel):
 
 
 # 5.2
-class Product(BaseModel):
-    ProductID: PositiveInt
-    ProductName: constr(max_length=40)
-    Category: Optional[Category]
-    Discontinued: int
+class Category(BaseModel):
+    CategoryID: PositiveInt
+    CategoryName: constr(max_length=15)
 
     class Config:
         orm_mode = True
 
 
-class Category(BaseModel):
-    CategoryID: PositiveInt
-    CategoryName: constr(max_length=15)
+class Product(BaseModel):
+    ProductID: PositiveInt
+    ProductName: constr(max_length=40)
+    Category: Optional[Category]
+    Discontinued: int
 
     class Config:
         orm_mode = True
