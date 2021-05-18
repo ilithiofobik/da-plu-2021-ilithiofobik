@@ -1,6 +1,5 @@
 from sqlalchemy import CHAR, Column, Date, Float, Integer, LargeBinary, SmallInteger, String, Table, Text, text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 metadata = Base.metadata
@@ -118,9 +117,6 @@ class Product(Base):
     ReorderLevel = Column(SmallInteger)
     Discontinued = Column(Integer, nullable=False)
 
-    supplier = relationship('Supplier', back_populates='products')
-    category = relationship('Category', lazy='immediate', back_populates='products')
-
 
 class Region(Base):
     __tablename__ = 'region'
@@ -160,8 +156,6 @@ class Supplier(Base):
     Phone = Column(String(24))
     Fax = Column(String(24))
     HomePage = Column(Text)
-
-    products = relationship('Product', back_populates='supplier')
 
 
 class Territory(Base):
